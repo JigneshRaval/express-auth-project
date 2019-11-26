@@ -1,0 +1,4 @@
+{"name":"Hiren1","username":"hiren","email":"hiren@gmail.com","password":"hiren","admin":false,"isEmailVerified":false,"_id":"aX1GVTGlyFS70yyh"}
+{"name":"Hiren","username":"hiren","email":"hiren@gmail.com","password":"hiren","admin":false,"isEmailVerified":false,"_id":"cqaPCH2caeXPYCZI"}
+{"name":"Hiren1","username":"hiren","email":"hiren@gmail.com","password":"hiren","admin":false,"isEmailVerified":false,"_id":"jj2jliPjsCQgiqYD"}
+{"$$indexCreated":{"fieldName":"name","unique":false,"sparse":false}}
