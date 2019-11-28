@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 
 import './assets/css/bootstrap.css'
@@ -10,6 +10,7 @@ import './App.css';
 // SERVICES
 // ==============================
 import { fakeAuth } from './services/auth.service';
+import { store, StateProvider } from './services/store';
 
 // COMPONENTS
 // ==============================
@@ -24,41 +25,58 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Support } from './pages/Support';
 import { Pricing } from './pages/Pricing';
+import { NoMatch } from './pages/NoMatch';
 
-const PrivateRoute = ({ component: Component, ...rest }) => (
+// ProtectedRoute HOC function to check if user is authenticated and login then route to component
+// Else redirect to login page
+const ProtectedRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={(props) => (
-        fakeAuth.isAuthenticated === true
+        fakeAuth.isAuthenticated === true || (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null)
             ? <Component {...props} />
             : <Redirect to={{
                 pathname: '/login',
-                state: { from: props.location }
+                state: {
+                    from: props.location,
+                    // prevLocation: path,
+                    error: "You need to login first!",
+                }
             }} />
     )} />
 );
 
+export const App = (props) => {
 
-function App() {
+    useEffect(() => {
+        let token = sessionStorage.getItem('token');
+        if (token && token !== null) {
+            fakeAuth.authenticate();
+        }
+    }, []);
+
     return (
-        <Router>
-            <React.Fragment>
-                <Header />
+        <StateProvider>
+            <Router>
+                <React.Fragment>
+                    <Header />
 
-                <Switch>
-                    <Route exact path="/" render={(props) => <Redirect to="/home" {...props} />} />
-                    {/* <Route path="/home" component={Home} exact={true} /> */}
-                    <Route path="/login" component={Login} exact={true} />
-                    <Route path="/register" component={Register} exact={true} />
-                    <Route path="/support" component={Support} exact={true} />
-                    <Route path="/pricing" component={Pricing} exact={true} />
-                    <PrivateRoute path='/home' component={Home} />
-                    <PrivateRoute path='/about' component={AboutUs} />
-                    {/* <Route path="*" component={NoMatch} /> */}
-                </Switch>
+                    <Switch>
+                        <Route exact path="/" render={(props) => <Redirect to="/home" {...props} />} />
+                        {/* <Route path="/home" component={Home} exact={true} /> */}
+                        <Route path="/login" component={Login} exact={true} />
+                        <Route path="/register" component={Register} exact={true} />
+                        <Route path="/support" component={Support} exact={true} />
+                        <Route path="/pricing" component={Pricing} exact={true} />
+                        <ProtectedRoute path='/home' component={Home} />
+                        <ProtectedRoute path='/about' component={AboutUs} />
+                        <Route path="*" component={NoMatch} />
+                    </Switch>
 
-                <Footer/>
-            </React.Fragment>
-        </Router>
+                    <Footer />
+                </React.Fragment>
+            </Router>
+        </StateProvider>
     );
+
 }
 
 export default App;

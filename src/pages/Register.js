@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Link, Redirect } from 'react-router-dom';
+
+// SERVICES
+// ============================
 import { fakeAuth } from '../services/auth.service';
+import { store } from '../services/store';
+
+// CONSTANTS
+// ============================
+const API_URL = 'http://localhost:3004/api/v1';
 
 export const Register = (props) => {
 
-    const API_URL = 'http://localhost:3004';
-
-    const [redirectToReferrer, setReferrer] = useState(false);
+    const { state, dispatch } = useContext(store);
 
     const { from } = props.location.state || { from: { pathname: '/' } }
 
@@ -59,37 +65,55 @@ export const Register = (props) => {
                 return response.json();
             }).then(data => {
                 console.log('login DATA :', data);
-                sessionStorage.setItem('token', data.token)
+                if (data && data.token) {
+                    sessionStorage.setItem('token', data.token);
+                }
+
+                const token = sessionStorage.getItem('token');
+
+                dispatch({ type: 'LOGGED_IN', name: data.name });
+
+                fakeAuth.authenticate(() => {
+                    console.log('Authenticated for new user.')
+                    /* if (token) {
+                        setReferrer(true);
+                    } */
+                });
             });
     }
 
     if (fakeAuth.isAuthenticated === true) {
         return <Redirect to={from} />
     }
-/*
-    if (redirectToReferrer === true) {
-        return <Redirect to={from} />
-    } */
 
     return (
         <form className="form-register" onSubmit={(event) => handleSubmit(event)}>
             <img className="mb-4" src="/docs/4.3/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72" />
             <h1 className="h3 mb-3 font-weight-normal">Please Register</h1>
 
-            <label htmlFor="inputName" className="sr-only">Name</label>
-            <input type="text" id="inputName" name="inputName" className="form-control" placeholder="Name" required="" autoFocus="" />
+            <div className="form-group">
+                <label htmlFor="inputName">Name</label>
+                <input type="text" id="inputName" name="inputName" className="form-control" placeholder="Name" required="" autoFocus="" />
+            </div>
 
-            <label htmlFor="inputEmail" className="sr-only">Email address</label>
-            <input type="email" id="inputEmail" name="inputEmail" className="form-control" placeholder="Email address" required="" autoFocus="" />
+            <div className="form-group">
+                <label htmlFor="inputEmail">Email address</label>
+                <input type="email" id="inputEmail" name="inputEmail" className="form-control" placeholder="Email address" required="" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" />
+            </div>
 
-            <label htmlFor="inputUsername" className="sr-only">Username</label>
-            <input type="text" id="inputUsername" name="inputUsername" className="form-control" placeholder="Username" required="" autoFocus="" />
+            <div className="form-group">
+                <label htmlFor="inputUsername">Username</label>
+                <input type="text" id="inputUsername" name="inputUsername" className="form-control" placeholder="Username" required="" />
+            </div>
 
-            <label htmlFor="inputPassword" className="sr-only">Password</label>
-            <input type="password" id="inputPassword" name="inputPassword" className="form-control" placeholder="Password" required="" />
+            <div className="form-group">
+                <label htmlFor="inputPassword">Password</label>
+                <input type="password" id="inputPassword" name="inputPassword" className="form-control" placeholder="Password" required="" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" />
+            </div>
 
             <button className="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-            <p className="mt-5 mb-3 text-muted">© 2017-2019</p>
+
+            <p className="p-2 text-center"><strong>Already have an account? <Link to="/login">Login</Link></strong></p>
         </form>
     )
 }

@@ -1,3 +1,5 @@
+@import './assets/css/page404.css';
+
 .App {
   text-align: center;
 }
@@ -19,11 +21,32 @@
 .App-link {
   color: #09d3ac;
 }
-
+.form-control {
+    height: auto;
+}
+input[type="text"],
+input[type="password"] {
+    padding: 10px;
+}
 .form-signin,
 .form-register {
     width: 100%;
-    max-width: 330px;
+    max-width: 400px;
     padding: 15px;
     margin: auto;
+    padding: 1em;
+    background: #FFF;
+    border: 1px solid #ccc;
+    box-shadow: 0 15px 15px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+.form-signin input[name="inputEmail"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }

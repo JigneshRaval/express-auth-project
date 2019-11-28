@@ -1,8 +1,10 @@
-let jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const config = require('./config.js');
 
-let checkToken = (req, res, next) => {
-    let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase
+let checkTokenMiddleware = (req, res, next) => {
+    // Express headers are auto converted to lowercase
+    let token = req.headers['x-access-token'] || req.headers['authorization'];
+
     if (token && token.startsWith('Bearer ')) {
         // Remove Bearer from string
         token = token.slice(7, token.length);
@@ -29,5 +31,5 @@ let checkToken = (req, res, next) => {
 };
 
 module.exports = {
-    checkToken: checkToken
+    checkToken: checkTokenMiddleware
 }

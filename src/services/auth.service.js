@@ -1,13 +1,20 @@
 export const fakeAuth = {
     isAuthenticated: false,
 
-    authenticate(cb) {
-        this.isAuthenticated = true
-        setTimeout(cb, 100)
+    authenticate(callback) {
+        this.isAuthenticated = true;
+        console.log('FakeAuth authenticated!');
+        if (callback) {
+            callback();
+        }
     },
 
-    signOut(cb) {
-        this.isAuthenticated = false
-        setTimeout(cb, 100)
+    signOut(callback) {
+        this.isAuthenticated = false;
+        sessionStorage.removeItem('token');
+        console.log('FakeAuth signed out!');
+        if (callback) {
+            callback();
+        }
     }
 }

@@ -14,7 +14,7 @@
         "react-scripts": "3.2.0"
     },
     "scripts": {
-        "server": "nodemon ./server/server.js",
+        "serve": "nodemon ./server/server.js",
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",

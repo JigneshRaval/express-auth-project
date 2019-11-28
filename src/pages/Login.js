@@ -1,15 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link, Redirect } from 'react-router-dom';
+
+// SERVICES
+// ============================
 import { fakeAuth } from '../services/auth.service';
+import { store } from '../services/store';
+
+// CONSTANTS
+// ============================
+const API_URL = 'http://localhost:3004/api/v1';
 
 export const Login = (props) => {
-
-    const API_URL = 'http://localhost:3004';
+    const signInFormRef = useRef(null);
     const [redirectToReferrer, setReferrer] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(null);
+
+    const { state, dispatch } = useContext(store);
 
     const { from } = props.location.state || { from: { pathname: '/' } }
 
-    // Handle Html to Markdown form submit
+    // form submit
     const handleSubmit = (event) => {
         event.preventDefault();
 
@@ -30,9 +40,7 @@ export const Login = (props) => {
     };
 
     const login = (formData) => {
-        const token = sessionStorage.getItem('token')
 
-        console.log('Token : ', token);
         window.fetch(`${API_URL}/login`, {
             method: 'POST',
             body: JSON.stringify(formData),
@@ -48,57 +56,73 @@ export const Login = (props) => {
                 // If error then exit
                 if (response.status !== 200) {
                     console.log('Looks like there was a problem. Status Code: ' + response.status);
+                    // Show error message sent by server
+                    setErrorMessage('Looks like there was a problem. Status Code: ' + response.status);
                     return;
                 }
 
-                // Examine the text in the response
-                // this.articles = response.json();
                 return response.json();
             }).then(data => {
-                console.log('login DATA :', data);
                 if (data) {
                     if (data.token) {
+                        // Set error message to null if data is available
+                        setErrorMessage(null);
+
+                        // Store token in to sessionStorage
                         sessionStorage.setItem('token', data.token);
+
+                        // Dispatch global event
+                        dispatch({ type: 'LOGGED_IN', name: data.name });
+
+                        fakeAuth.authenticate(() => {
+                            setReferrer(true);
+                        });
+                    } else {
+                        // Show error message sent by server
+                        setErrorMessage(data.message);
+
+                        // Reset sign-in form
+                        signInFormRef.current.reset();
                     }
                 }
-
-                fakeAuth.authenticate(() => {
-                    if (token) {
-                        setReferrer(true);
-                    }
-                });
-
             });
     }
 
     useEffect(() => {
+        // console.log('useEffect : ', fakeAuth.isAuthenticated, redirectToReferrer);
+    }, [redirectToReferrer])
 
-    }, [])
-
-    if (fakeAuth.isAuthenticated === true) {
+    if (fakeAuth.isAuthenticated || (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null)) {
         return <Redirect to={from} />
     }
 
-    if (redirectToReferrer === true) {
+    if (redirectToReferrer) {
         return <Redirect to={from} />
     }
     return (
-        <form className="form-signin" onSubmit={(event) => handleSubmit(event)}>
-            <img className="mb-4" src="/docs/4.3/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72" />
+        <form className="form-signin" onSubmit={(event) => handleSubmit(event)} ref={signInFormRef}>
+
+            {/* <b>redirectToReferrer :{redirectToReferrer.toString()}</b><br />
+            <strong>isAuthenticated = {fakeAuth.isAuthenticated.toString()}</strong> */}
+
+            {errorMessage ? <div className="alert alert-danger" role="alert">{errorMessage}</div> : null}
+
+            <img className="mb-4" src="/assets/images/bootstrap-solid.svg" alt="" width="72" height="72" />
             <h1 className="h3 mb-3 font-weight-normal">Please sign in</h1>
 
-            <label htmlFor="inputEmail" className="sr-only">Email address</label>
-            <input type="text" id="inputEmail" name="inputEmail" className="form-control" placeholder="Email address" required="" autoFocus="" />
+            <label htmlFor="inputEmail" className="sr-only">Username</label>
+            <input type="text" id="inputEmail" name="inputEmail" className="form-control" placeholder="Username or Email address" required={true} autoFocus="" />
 
             <label htmlFor="inputPassword" className="sr-only">Password</label>
-            <input type="password" id="inputPassword" name="inputPassword" className="form-control" placeholder="Password" required="" />
+            <input type="password" id="inputPassword" name="inputPassword" className="form-control" placeholder="Password" required={true} pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" />
 
             <div className="checkbox mb-3">
                 <label><input type="checkbox" value="remember-me" name="chkRememberMe" /> Remember me</label>
             </div>
-            <p>Don't have an account? <Link to="/register">Register</Link></p>
+
             <button className="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-            <p className="mt-5 mb-3 text-muted">© 2017-2019</p>
+
+            <p className="p-2 text-center"><strong>Don't have an account? <Link to="/register">Register</Link></strong></p>
         </form>
     )
 }

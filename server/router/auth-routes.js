@@ -1,77 +1,25 @@
-// server/router/index.js
+// server/router/auth-routes.js
+
+// Implemented Node.js Crypto module to hash/salt password
+// Ref : https://www.geeksforgeeks.org/node-js-password-hashing-crypto-module/
 
 const routes = require('express').Router();
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
+
+// const jwt = require('jsonwebtoken');
 const db = require('../db.config');
-const config = require('../config');
+// const config = require('../config');
 let middleware = require('../middleware');
 
-// Utility Functions
-// ===========================
-function encryptPassword(password) {
-    // Hashing user's salt and password with 1000 iterations, 64 length and sha512 digest
-    // Syntax : crypto.pbkdf2Sync("password", "salt", "iterations", "length", "digest")
-    let salt = crypto.randomBytes(16).toString('hex') || generateSalt(SaltLength);
-    let hash = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
+let { encryptPassword, isValidPassword, generateToken } = require('../utils');
 
-    return { salt, hash };
-}
-
-function isValidPassword(password, salt) {
-    // https://www.geeksforgeeks.org/node-js-password-hashing-crypto-module/
-    // Method to check the entered password is correct or not
-    // valid password method checks whether the user
-    // password is correct or not
-    // It takes the user password from the request
-    // and salt from user database entry
-    // It then hashes user password and salt
-    // then checks if this generated hash is equal
-    // to user's hash in the database or not
-    // If the user's hash is equal to generated hash
-    // then the password is correct otherwise not
-    // let salt = crypto.randomBytes(16).toString('hex');
-    var hash = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
-    return hash;
-}
-
-function generateSalt(len) {
-    var set = '0123456789abcdefghijklmnopqurstuvwxyzABCDEFGHIJKLMNOPQURSTUVWXYZ',
-        setLen = set.length,
-        salt = '';
-    for (var i = 0; i < len; i++) {
-        var p = Math.floor(Math.random() * setLen);
-        salt += set[p];
-    }
-    return salt;
-}
-
-// Generate Token using secret from process.env.JWT_SECRET
-// process.env.JWT_SECRET = 'keyboard cat 4 ever'
-function generateToken(user) {
-    //1. Don't use password and other sensitive fields
-    //2. Use fields that are useful in other parts of the
-    // app/collections/models
-    var u = {
-        name: user.name,
-        username: user.username,
-        admin: user.admin,
-        _id: user._id.toString(),
-    };
-
-    return token = jwt.sign(u, config.secret, {
-        // expiresIn: 60 * 60 * 24 // expires in 24 hours
-        expiresIn: 5000 // expires in 2000 milliseconds
-    });
-}
-
-// GET /api
-routes.get('/', middleware.checkToken, (request, response) => {
+// GET /api/v1/**
+// TODO : Not working in route file, need to find solution
+routes.get('/*', middleware.checkToken, (request, response) => {
     response.status(200).json({ message: 'Connected!' });
 });
 
 
-// GET : All Articles (/api/articles)
+// Login (/api/v1/login) [POST]
 routes.post('/login', (request, response) => {
     let username = request.body.username.trim();
     let password = request.body.password.trim();
@@ -92,21 +40,15 @@ routes.post('/login', (request, response) => {
             if (docs && docs.length > 0) {
                 for (let i = 0; i < docs.length; i++) {
                     let passwordHash = isValidPassword(password, docs[i].salt);
-                    console.log('Password ========', docs[i].password, '===', passwordHash)
 
                     if (docs[i].username === username && docs[i].password === passwordHash) {
-                        /* let token = jwt.sign({ username: username },
-                            config.secret,
-                            {
-                                expiresIn: '5000' // expires in 24 hours
-                            }
-                        ); */
                         let token = generateToken({
                             username: docs[i].username,
                             name: docs[i].name,
                             _id: docs[i]._id,
                             admin: docs[i].admin
                         });
+
                         // return the JWT token for the future API calls
                         response.status(200).json({
                             success: true,
@@ -114,6 +56,7 @@ routes.post('/login', (request, response) => {
                             token: token,
                             name: docs[i].username
                         });
+
                         break;
                     } else {
                         response.status(200).json({
@@ -142,17 +85,16 @@ routes.post('/login', (request, response) => {
     }
 });
 
-// GET : All tags (/api/articles/tags)
+// Logout (/api/v1/logout) [POST]
 routes.post('/logout', (request, response) => {
-    // res.redirect('/login');
     res.status(200).send({
         success: true,
-        message: 'Logout successfully'
+        message: 'Logout successfully',
+        token: null
     });
 });
 
-
-// GET : Get Single Article by Id (/api/articles/:articleId)
+// Register new user (/api/v1/register) [POST]
 routes.post('/register', (request, response) => {
     var body = request.body;
 
@@ -163,11 +105,10 @@ routes.post('/register', (request, response) => {
         name: body.name.trim(),
         username: body.username.trim(),
         email: body.email.trim(),
-        // password: hash,
         password: hash,
         admin: body.admin,
         isEmailVerified: body.isEmailVerified,
-        salt: salt
+        salt: salt // Salt must be stored into database to decrypt password again using this salt
     };
 
     db.users.insert(user, function (err, newDoc) {
