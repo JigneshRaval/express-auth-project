@@ -2,6 +2,8 @@
 // Utility Functions
 // ===========================
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const config = require('./config.js');
 
 function encryptPassword(password) {
     // Hashing user's salt and password with 1000 iterations, 64 length and sha512 digest
@@ -44,18 +46,23 @@ function generateSalt(len) {
 // process.env.JWT_SECRET = 'keyboard cat 4 ever'
 function generateToken(user) {
     //1. Don't use password and other sensitive fields
-    //2. Use fields that are useful in other parts of the
-    // app/collections/models
+    //2. Use fields that are useful in other parts of the  /app/collections/models
+
+    // iat : is a Time when the token was issued (Time is in seconds, NO milliseconds)
+    // exp : is a time when token will expire (Time is in seconds, NO milliseconds),
+    // We can also use : 60, "2 days", "10h", "7d"
     var u = {
         name: user.name,
         username: user.username,
         admin: user.admin,
         _id: user._id.toString(),
+        iat: Math.floor((new Date().getTime() + 0 * 1000) / 1000),
+        exp: Math.floor((new Date().getTime() + 0 * 1000) / 1000) + 15, // Expire JWT after 15 seconds
     };
 
     return token = jwt.sign(u, config.secret, {
         // expiresIn: 60 * 60 * 24 // expires in 24 hours
-        expiresIn: 5000 // expires in 2000 milliseconds
+        // expiresIn: 5000 // expires in 2000 milliseconds
     });
 }
 

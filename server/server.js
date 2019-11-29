@@ -5,7 +5,7 @@ const path = require('path');
 const port = process.env.PORT || 3004;
 let middleware = require('./middleware');
 
-const authRoutes = require('./router/index');
+const authRoutes = require('./router/auth-routes');
 
 /* Options route used for preflight request to the login POST route (cors) */
 // https://picocoder.io/node-express-tutorial-part-5-user-authentication-jwt/
