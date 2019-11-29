@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 // SERVICES
 // ============================
-import { fakeAuth } from '../services/auth.service';
+// import { fakeAuth } from '../services/auth.service';
 import { store } from '../services/store';
 
 // COMPONENTS
@@ -23,7 +23,7 @@ export const Header = () => {
                 <Link to="/support" className="p-2 text-dark">Support</Link>
                 <Link to="/pricing" className="p-2 text-dark">Pricing</Link>
                 {
-                    fakeAuth.isAuthenticated || (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null) ? <SignOutButton dispatch={dispatch} name={state.name} /> : <Link to="/login" className="btn btn-outline-primary">Login</Link>
+                    state.isLoggedIn || (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null) ? <SignOutButton dispatch={dispatch} name={state.name} /> : <Link to="/login" className="btn btn-outline-primary">Login</Link>
                 }
             </nav>
         </div>

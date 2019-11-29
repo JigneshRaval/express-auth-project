@@ -31,50 +31,49 @@ routes.post('/login', (request, response) => {
     if (username && password) {
 
         // Find all documents in the collection
-        db.users.find({ username: username }).sort({ date: -1 }).exec(function (err, docs) {
+        db.users.findOne({ username: username }).sort({ date: -1 }).exec(function (error, doc) {
 
-            if (err) {
-                return err;
+            if (error) {
+                return error;
             }
 
-            if (docs && docs.length > 0) {
-                for (let i = 0; i < docs.length; i++) {
-                    let passwordHash = isValidPassword(password, docs[i].salt);
+            if (doc) {
+                let passwordHash = isValidPassword(password, doc.salt);
 
-                    if (docs[i].username === username && docs[i].password === passwordHash) {
-                        let token = generateToken({
-                            username: docs[i].username,
-                            name: docs[i].name,
-                            _id: docs[i]._id,
-                            admin: docs[i].admin
-                        });
+                if (doc.username === username && doc.password === passwordHash) {
+                    let token = generateToken({
+                        username: doc.username,
+                        name: doc.name,
+                        _id: doc._id,
+                        admin: doc.admin
+                    });
 
-                        // return the JWT token for the future API calls
-                        response.status(200).json({
-                            success: true,
-                            message: 'Authentication successful!',
-                            token: token,
-                            name: docs[i].username
-                        });
-
-                        break;
-                    } else {
-                        response.status(200).json({
-                            success: false,
-                            message: 'Incorrect username or password'
-                        });
-                    }
+                    // return the JWT token for the future API calls
+                    response.status(200).json({
+                        success: true,
+                        message: 'Authentication successful!',
+                        token: token,
+                        name: doc.username,
+                        admin: doc.admin,
+                        _id: doc._id,
+                    });
+                } else {
+                    // User is registered but don't have valid Username or Password
+                    response.status(200).json({
+                        success: false,
+                        message: 'Incorrect username or password'
+                    });
                 }
-
             } else {
+
+                // User is not registered
                 response.status(200).send({
                     success: false,
                     message: 'Please check your username and password'
                 });
-
             }
 
-            // response.status(200).send({ message: 'Fetched all the articles successfully', docs });
+            // response.status(200).send({ message: 'Fetched all the articles successfully', doc });
         });
 
     } else {
@@ -129,5 +128,21 @@ routes.post('/register', (request, response) => {
 
     });
 });
+
+routes.get('/token/verify', middleware.checkToken, function (req, res, next) {
+    var username = req.body.username
+    var refreshToken = req.body.refreshToken
+    if ((refreshToken in refreshTokens) && (refreshTokens[refreshToken] == username)) {
+        var user = {
+            'username': username,
+            'role': 'admin'
+        }
+        var token = jwt.sign(user, SECRET, { expiresIn: 300 })
+        res.json({ token: 'JWT ' + token })
+    }
+    else {
+        res.send(401)
+    }
+})
 
 module.exports = routes;

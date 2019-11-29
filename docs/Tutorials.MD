@@ -6,6 +6,8 @@
 
 https://hptechblogs.com/password-hashing-in-node-js-using-the-pbkdf2-in-crypto-library/
 
+**Note : Salt need to be stored into database along with hashed password**
+
 ```javascript
 const crypto = require('crypto');
 

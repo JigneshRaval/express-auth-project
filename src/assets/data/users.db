@@ -4,6 +4,7 @@
 {"name":"Hiren1","username":"hiren","email":"hiren@gmail.com","password":"hiren","admin":false,"isEmailVerified":false,"_id":"aX1GVTGlyFS70yyh"}
 {"name":"Hiren","username":"hiren","email":"hiren@gmail.com","password":"hiren","admin":false,"isEmailVerified":false,"_id":"cqaPCH2caeXPYCZI"}
 {"name":"Hiren1","username":"hiren","email":"hiren@gmail.com","password":"hiren","admin":false,"isEmailVerified":false,"_id":"jj2jliPjsCQgiqYD"}
+{"name":"","username":"","email":"","password":"700730b2ab6ac7ecff09b206b5889669ebece3d004af19471e11726335a11176668d114acd5007206ce7067198d20416d14d396900e8788460fbe5522aa7ce85","admin":false,"isEmailVerified":false,"salt":"fda508694e898a041bfb00a77f7107fe","_id":"rN6IABdlNH1GUeiM"}
 {"name":"Sandip2","username":"sandip2","email":"sandip2@test.com","password":"aed8dd31457142f55054c23e0e7ac535cff4c783d07e4b535e4308b61e6f58a88c7f161e42c1a859baf6542efead078de53d29c817a678ff1790b290496db516","admin":false,"isEmailVerified":false,"_id":"sRgnFJmzsKlya3tX"}
 {"name":"jignesh","username":"jignesh","email":"jignesh@test.com","password":"aad575cfc4a77c0efc5774d954facc57b7b8514ab1588465fcd6a857a208fb2cef8d6f9c2c33d8d1e84132ce805ec9a81d46e98ff4023c4962237142d6632175","admin":false,"isEmailVerified":false,"salt":"b57dd00d4ad4feb426dbe24ad012b165","_id":"yeSB1bc0Fgkz1vod"}
 {"$$indexCreated":{"fieldName":"name","unique":false,"sparse":false}}
