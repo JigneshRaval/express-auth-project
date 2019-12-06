@@ -3,17 +3,21 @@ import { Link, Redirect } from 'react-router-dom';
 
 // SERVICES
 // ============================
-import { fakeAuth } from '../services/auth.service';
+// import { fakeAuth } from '../services/auth.service';
 import { store } from '../services/store';
 import { RemoteService } from '../services/remote.service';
+import { UtilityService } from '../services/utils.service';
 
 // CONSTANTS
 // ============================
 const remoteService = new RemoteService();
+const utilityService = new UtilityService();
 
 export const Login = (props) => {
     const signInFormRef = useRef(null);
     const [redirectToReferrer, setReferrer] = useState(false);
+    const [wrongPasswordAttempts, setWrongPasswordAttempts] = useState(0);
+    const [error, setError] = useState(null);
 
     const { state, dispatch } = useContext(store);
 
@@ -51,7 +55,11 @@ export const Login = (props) => {
         };
 
         remoteService.request('POST', options).then((data) => {
+            console.log('Login Data :', data);
             if (data) {
+                if (data.errorCode === 0) {
+                    setError(data.errorCode)
+                }
                 if (data.token) {
                     // Set error message to null if data is available
                     dispatch({
@@ -66,12 +74,15 @@ export const Login = (props) => {
                     // Store token in to sessionStorage
                     sessionStorage.setItem('token', data.token);
 
+                    utilityService.checkSessionExpiry(dispatch, props.history);
+
                     setReferrer(true);
 
                     /* fakeAuth.authenticate(() => {
                         setReferrer(true);
                     }); */
                 } else {
+
                     // Show error message sent by server
                     dispatch({
                         type: 'UPDATE_MESSAGE',
@@ -84,6 +95,10 @@ export const Login = (props) => {
 
                     // Reset sign-in form
                     signInFormRef.current.reset();
+
+                    if (data.data && data.data.failedAttempt) {
+                        setWrongPasswordAttempts(data.data.failedAttempt);
+                    }
                 }
             }
         });
@@ -91,12 +106,17 @@ export const Login = (props) => {
 
     useEffect(() => {
         // console.log('useEffect : ', fakeAuth.isAuthenticated, redirectToReferrer);
-        console.log('isAuthenticated :: ', state.isLoggedIn);
+        // console.log('isAuthenticated :: ', state.isLoggedIn);
     }, [redirectToReferrer])
 
     /* if (fakeAuth.isAuthenticated || (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null)) {
         return <Redirect to={from} />
     } */
+
+    // Hide login form if continuous wrong password attempt
+    if (wrongPasswordAttempts > 3) {
+        // return <div className="alert alert-danger" role="alert">Your account is locked due to wrong password. Please try after some time</div>;
+    }
 
     if (redirectToReferrer) {
         return <Redirect to={from} />
@@ -109,6 +129,10 @@ export const Login = (props) => {
             <strong>isAuthenticated = {fakeAuth.isAuthenticated.toString()}</strong> */}
 
             {state.message ? <div className="alert alert-danger" role="alert">{state.message}</div> : null}
+            {
+                error === 0 ? <div className="alert alert-danger" role="alert">Your account does not exists with us. <Link to="/register">Create new account</Link> </div> : null
+
+            }
 
             <img className="mb-4" src="/assets/images/bootstrap-solid.svg" alt="" width="72" height="72" />
             <h1 className="h3 mb-3 font-weight-normal">Please sign in</h1>
@@ -126,6 +150,8 @@ export const Login = (props) => {
             <button className="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
 
             <p className="p-2 text-center"><strong>Don't have an account? <Link to="/register">Register</Link></strong></p>
+
+            <p className="p-2 text-center"><Link to="/register">Forget password?</Link></p>
         </form>
     )
 }

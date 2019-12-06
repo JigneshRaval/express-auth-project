@@ -40,8 +40,8 @@ app.use(express.static(path.resolve(__dirname, '../')));
 app.use('/api/v1', authRoutes);
 
 // Check all the API routes for token
-app.all('/api/v1/**', middleware.checkToken, (request, response) => {
+/* app.all('/api/v1/**', middleware.checkToken, (request, response) => {
     response.status(200).json({ message: 'Getting data from ' + request.url });
-});
+}); */
 
 app.listen(port, () => console.log(`Server is listening on port: ${port}`));

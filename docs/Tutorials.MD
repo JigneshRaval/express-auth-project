@@ -126,3 +126,11 @@ function generateToken(user) {
     });
 }
 ```
+## collapsible markdown?
+
+<details>
+<summary>CLICK ME</summary>
+<p>
+Content
+</p>
+</details>

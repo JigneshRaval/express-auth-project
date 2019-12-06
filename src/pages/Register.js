@@ -38,7 +38,6 @@ export const Register = (props) => {
         // Submit response to server
         // =====================================
         register(formDataObj);
-        props.history.push('/home');
     };
 
     const register = (formData) => {
@@ -67,19 +66,19 @@ export const Register = (props) => {
                 console.log('login DATA :', data);
                 if (data && data.token) {
                     sessionStorage.setItem('token', data.token);
+                    dispatch({ type: 'LOGGED_IN', name: data.name, isLoggedIn: true });
+
+                    fakeAuth.authenticate(() => {
+                        console.log('Authenticated for new user.')
+                    });
+
+                    props.history.push('/home');
                 }
-
-                const token = sessionStorage.getItem('token');
-
-                dispatch({ type: 'LOGGED_IN', name: data.name });
-
-                fakeAuth.authenticate(() => {
-                    console.log('Authenticated for new user.')
-                    /* if (token) {
-                        setReferrer(true);
-                    } */
-                });
             });
+    }
+
+    if (state.isLoggedIn === true) {
+        return <Redirect to={from} />
     }
 
     if (fakeAuth.isAuthenticated === true) {

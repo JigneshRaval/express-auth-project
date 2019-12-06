@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 // SERVICES
 // ============================
@@ -26,7 +26,7 @@ export const Pricing = (props) => {
         remoteService.request('GET', options).then((data) => {
             if (data) {
                 // If token is expired then redirect to login page
-                if (data.message && (data.message === 'Token is not valid jwt expired' || data.message === 'Token is not valid jwt malformed')) {
+                if (data.message && (data.message === 'jwt expired' || data.message === 'jwt malformed')) {
                     dispatch({
                         type: 'UPDATE_MESSAGE',
                         message: 'Your login session has expired. Please login again.',
@@ -54,6 +54,7 @@ export const Pricing = (props) => {
                 <h1 className="display-4">Pricing</h1>
                 <p className="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap example. It’s built with default Bootstrap components and utilities with little customization.</p>
             </div>
+
             <div className="container">
                 <div className="card-deck mb-3 text-center">
                     <div className="card mb-4 shadow-sm">

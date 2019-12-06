@@ -26,6 +26,25 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
     1. [Use Hooks + Context, not React + Redux](https://blog.logrocket.com/use-hooks-and-context-not-react-and-redux/)
 
+**TODO:**
+
+- [ ]  Implement maximum wrong password attempt
+
+    **Requirements**
+    - A user's account should be "locked" after some number of consecutive failed login attempts
+    - A user's account should become unlocked once a sufficient amount of time has passed
+    - The User model should expose the reason for a failed login attempt to the application (though not necessarily to the end user)
+
+- [ ]  Implement forgot password flow
+
+- [ ]  Implement reset password flow
+
+- [ ]  Implement email verification for forgot/reset password
+
+- [ ]  Implement Admin and Super Admin UI interface
+
+- [ ]  Implement Session expire warning message popup
+
 ### **Frontend**
 
 - React

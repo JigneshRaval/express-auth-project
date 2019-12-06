@@ -1,16 +1,13 @@
-import React, { useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
-
-import './assets/css/bootstrap.css'
-import 'jquery';
-import 'bootstrap/dist/js/bootstrap.bundle';
-
-import './App.css';
+/*eslint-disable no-undef*/
+import React, { useEffect } from 'react';
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 
 // SERVICES
 // ==============================
 import { fakeAuth } from './services/auth.service';
-import { store, StateProvider } from './services/store';
+import { StateProvider } from './services/store';
+import { UtilityService } from './services/utils.service';
+import { ReactRouterGlobalHistory } from './services/global-history';
 
 // COMPONENTS
 // ==============================
@@ -27,11 +24,13 @@ import { Support } from './pages/Support';
 import { Pricing } from './pages/Pricing';
 import { NoMatch } from './pages/NoMatch';
 
+const utilityService = new UtilityService();
+
 // ProtectedRoute HOC function to check if user is authenticated and login then route to component
 // Else redirect to login page
 const ProtectedRoute = ({ component: Component, ...rest }) => (
     <Route {...rest} render={(props) => (
-        fakeAuth.isAuthenticated === true || (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null)
+        (sessionStorage.getItem('token') && sessionStorage.getItem('token') !== null)
             ? <Component {...props} />
             : <Redirect to={{
                 pathname: '/login',
@@ -45,35 +44,40 @@ const ProtectedRoute = ({ component: Component, ...rest }) => (
 );
 
 export const App = (props) => {
+    console.log('App Props : ', props);
 
     useEffect(() => {
         let token = sessionStorage.getItem('token');
+        sessionStorage.setItem('isSessionExtended', false);
+
         if (token && token !== null) {
             fakeAuth.authenticate();
         }
+
+        utilityService.checkSessionExpiry(null, null);
+
     }, []);
 
     return (
         <StateProvider>
-            <Router>
-                <React.Fragment>
-                    <Header />
+            <BrowserRouter>
+                <ReactRouterGlobalHistory />
+                <Header />
 
-                    <Switch>
-                        <Route exact path="/" render={(props) => <Redirect to="/home" {...props} />} />
-                        {/* <Route path="/home" component={Home} exact={true} /> */}
-                        <Route path="/login" component={Login} exact={true} />
-                        <Route path="/register" component={Register} exact={true} />
-                        <Route path="/support" component={Support} exact={true} />
-                        <Route path="/pricing" component={Pricing} exact={true} />
-                        <ProtectedRoute path='/home' component={Home} />
-                        <ProtectedRoute path='/about' component={AboutUs} />
-                        <Route path="*" component={NoMatch} />
-                    </Switch>
+                <Switch>
+                    <Route exact path="/" render={(props) => <Redirect to="/home" {...props} />} />
+                    {/* <Route path="/home" component={Home} exact={true} /> */}
+                    <Route path="/login" component={Login} exact={true} />
+                    <Route path="/register" component={Register} exact={true} />
+                    <Route path="/support" component={Support} exact={true} />
+                    <Route path="/pricing" component={Pricing} exact={true} />
+                    <ProtectedRoute path='/home' component={Home} />
+                    <ProtectedRoute path='/about' component={AboutUs} />
+                    <Route path="*" component={NoMatch} />
+                </Switch>
 
-                    <Footer />
-                </React.Fragment>
-            </Router>
+                <Footer />
+            </BrowserRouter>
         </StateProvider>
     );
 
