@@ -152,6 +152,16 @@ export const Login = (props) => {
             <p className="p-2 text-center"><strong>Don't have an account? <Link to="/register">Register</Link></strong></p>
 
             <p className="p-2 text-center"><Link to="/register">Forget password?</Link></p>
+
+            <div>
+                <h4>Secure password tips:</h4>
+                <ul>
+                    <li><span>Use at least 8 characters, a combination of numbers and letters is best.</span></li>
+                    <li><span>Do not use the same password you have used with us previously.</span></li>
+                    <li><span>Do not use dictionary words, your name, e-mail address, mobile phone number or other personal information that can be easily obtained.</span></li>
+                    <li><span>Do not use the same password for multiple online accounts.</span></li>
+                </ul>
+            </div>
         </form>
     )
 }
